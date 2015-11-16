@@ -43,7 +43,7 @@ class grafico2(ListAPIView):
 
 
 class grafico3(ListAPIView):
-    queryset = ['Total','Parcial']
+    queryset = ['Diferença','Parcial']
 
     def get_serializer_class(self):
         serializer_class = IndiceSerializer
@@ -121,11 +121,12 @@ class grafico8(ListAPIView):
     def get_queryset(self):
         ano = self.request.GET.get('ano', None)
         mes = self.request.GET.get('mes', None)
+        indice = self.request.GET.get('indice', 0)
 
         if int(mes) > 7:
-            queryset = [str(ano) + '-' + str((int(ano) + 1))]
+            queryset = [str(int(ano) + int(indice)) + '-' + str((int(ano) + int(indice) + 1))]
         else:
-            queryset = [str((int(ano) - 1)) + '-' + str(ano)]
+            queryset = [str((int(ano) + int(indice) - 1)) + '-' + str(int(ano) + int(indice))]
                     
         # if int(mes) > 7:
         #     queryset = [str(ano) + '-' + str((int(ano) + 1)), str((int(ano) - 1)) + '-' + str(ano)]

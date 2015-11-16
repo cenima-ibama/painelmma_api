@@ -62,6 +62,9 @@ class DailyAlertaDeter(models.Model):
         except AttributeError:
             pass
 
+    def __str__(self):
+        return "mes: %s, ano: %s, mesid: %s" % (self.mes, self.ano, self.mesid)
+
 
 class DailyAlertaLandsat(models.Model):
     objectid = models.AutoField(primary_key=True)

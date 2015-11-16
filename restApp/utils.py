@@ -58,3 +58,9 @@ def get_reverse_month(month):
 def belongs_prodes(qs,prodes):
     return ((get_reverse_month(qs['mes']) >= 8 and int(qs['ano']) == prodes[0]) or\
              (get_reverse_month(qs['mes']) <= 7 and int(qs['ano']) == prodes[1]))
+
+def get_prodes(mes, ano, indice=0):
+    if int(mes) > 7:
+        return str(int(ano) + int(indice)) + '-' + str(int(ano) + int(indice) + 1)
+    else:
+        return str(int(ano) + int(indice) - 1) + '-' + str(int(ano) + int(indice))

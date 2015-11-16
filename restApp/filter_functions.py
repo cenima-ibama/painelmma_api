@@ -101,7 +101,10 @@ def filter_indice_total(queryset, context, hasStage=True):
             estagio=context['estagio']
         )
 
-    return queryset.values('periodo_prodes')
+
+    mes_parc = (int(context['mes']) - 7) if (int(context['mes']) > 7) else (int(context['mes']) + 5)
+
+    return queryset.values('periodo_prodes').filter(mesid__in=['{:02d}'.format(i) for i in range(int(mes_parc) + 1,13)])
 
 
 

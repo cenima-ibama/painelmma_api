@@ -6,7 +6,7 @@ from django.db.models import Sum, Count
 
 from .models import *
 
-from .utils import get_reverse_month, belongs_prodes
+from .utils import get_reverse_month, belongs_prodes, get_prodes
 from .filter_functions import *
 
 
@@ -84,11 +84,17 @@ class IndiceSerializer(BaseSerializer):
     def to_representation(self, obj):
         tipo = self.context['request'].GET.get('tipo', None)
         estagio = self.context['request'].GET.get('estagio', None)
+        mes = self.context['request'].GET.get('mes', None)
+        ano = self.context['request'].GET.get('ano', None)
         series = 2 + int(self.context['request'].GET.get('frequencia',0)) if self.context['request'].GET.get('frequencia',0) else 2
 
         hasStage = False;
 
-        periodos = [str(2015 - i) + '-' + str(2016-i) for i in range(0,series)]
+        seriesRange = list(range(-1 * series, 0))
+        seriesRange.reverse()
+
+        periodos = [get_prodes(mes, ano, i + 1) for i in seriesRange]
+        # periodos = [str(2015 - i) + '-' + str(2016-i) for i in range(0,series)]
         # periodos = ['2015-2016','2014-2015'];
 
         data = []
@@ -102,7 +108,7 @@ class IndiceSerializer(BaseSerializer):
             elif tipo == 'DETER_QUALIF':
                 queryset = DailyAlertaDeterQualif.objects.filter(periodo_prodes=per)
 
-            if obj == 'Total':
+            if obj == 'Diferença':
                 queryset = filter_indice_total(queryset, self.context['request'].GET, hasStage)
             else:
                 queryset = filter_indice_parcial(queryset, self.context['request'].GET, hasStage)
@@ -194,8 +200,8 @@ class UFComparativoSerializer(BaseSerializer):
     def to_representation(self, obj):
         uf = self.context['request'].GET.get('uf', None)
         indice = self.context['request'].GET.get('indice', 0)
-        # ano = self.context['request'].GET.get('ano', None)
-        # mes = self.context['request'].GET.get('mes', None)
+        mes = self.context['request'].GET.get('mes', None)
+        ano = self.context['request'].GET.get('ano', None)
         
         # if int(mes) > 7:
         #     prodes = str(ano) + '-' + str(int(ano) + 1)
@@ -203,7 +209,8 @@ class UFComparativoSerializer(BaseSerializer):
         #     prodes = str((int(ano) - 1)) + '-' + str(ano)
 
         # prodes = '2015-2016'
-        prodes = str(2015 + int(indice)) + '-' + str(2016 + int(indice))
+        # prodes = str(2015 + int(indice)) + '-' + str(2016 + int(indice))
+        prodes = get_prodes(mes, ano, indice)
 
 
         if obj == 'AWIFS':
