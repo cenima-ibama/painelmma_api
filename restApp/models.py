@@ -58,6 +58,9 @@ class DailyAlertaDeter(models.Model):
         managed = False
         db_table = 'ibama\".\"vw_alerta_deter'
 
+    def __str__(self):
+        return "mes: %s, ano: %s, mesid: %s" % (self.mes, self.ano, self.mesid)
+
 
 class DailyAlertaLandsat(models.Model):
     objectid = models.AutoField(primary_key=True)
