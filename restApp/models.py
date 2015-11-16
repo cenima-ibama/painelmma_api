@@ -9,9 +9,8 @@
 # into your database.
 from __future__ import unicode_literals
 
-from datetime import date
-
 from django.contrib.gis.db import models
+from django.conf import settings
 
 from .utils import get_reverse_month
 
@@ -33,12 +32,14 @@ class DailyAlertaAwifs(models.Model):
     periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"vw_alerta_awifs'
+        try:
+            db_table = '%s\".\"vw_alerta_awifs' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
 
 class DailyAlertaDeter(models.Model):
-
     objectid = models.AutoField(primary_key=True)
     mes = models.CharField(max_length=10, blank=True, null=True)
     ano = models.SmallIntegerField(blank=True, null=True)
@@ -55,8 +56,11 @@ class DailyAlertaDeter(models.Model):
     periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"vw_alerta_deter'
+        try:
+            db_table = '%s\".\"vw_alerta_deter' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
 
 class DailyAlertaLandsat(models.Model):
@@ -76,8 +80,11 @@ class DailyAlertaLandsat(models.Model):
     periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"vw_alerta_indicar'
+        try:
+            db_table = '%s\".\"vw_alerta_indicar' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
 
 class DailyAlertaDeterQualif(models.Model):
@@ -100,8 +107,11 @@ class DailyAlertaDeterQualif(models.Model):
     mesid = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"vw_deter_qualificado'
+        try:
+            db_table = '%s\".\"vw_deter_qualificado' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
 
 class PublicAlertaDeter(models.Model):
@@ -137,8 +147,11 @@ class PublicAlertaDeter(models.Model):
     periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"vw_publica_alerta_deter_por_periodo'
+        try:
+            db_table = '%s\".\"vw_publica_alerta_deter_por_periodo' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
 
 class TaxaProdes(models.Model):
@@ -153,9 +166,9 @@ class TaxaProdes(models.Model):
     rr = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=False)
     to = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=False)
 
-    class Meta:
-        managed = False
-        db_table = 'public\".\"taxa_prodes'
+    #class Meta:
+        #managed = False
+        #db_table = 'public\".\"taxa_prodes'
 
     def total(self):
         return self.ac + self.am + self.ap + self.ma + self.mt + self.pa + self.ro + self.rr + self.to
@@ -177,8 +190,11 @@ class TaxaNuvens(models.Model):
     dat_cadastro = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'ibama\".\"taxa_nuvem'
+        try:
+            db_table = '%s\".\"taxa_nuvem' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
 
     def periodo_prodes(self):
         if get_reverse_month(self.mes) > 7:
