@@ -55,17 +55,21 @@ SERVER_EMAIL = EMAIL_HOST_USER
 DATABASES = {}
 ########## END DATABASE CONFIGURATION
 
+########## DATABASE ROUTERS CONFIGURATION
+#Uncomment this to add routers in production system
+#DATABASE_ROUTERS = ['restApp.dbrouters.SiscomRouter']
+########## END DATABASE ROUTERS CONFIGURATION
 
 ########## CACHE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#caches
 CACHES = {}
 ########## END CACHE CONFIGURATION
 
-########## DATABASE ROUTERS CONFIG
-DATABASE_ROUTERS = ['restApp.dbrouters.SiscomRouter']
-########## END DATABASE ROUTERS CONFIG
-
 ########## SECRET CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = get_env_setting('SECRET_KEY')
 ########## END SECRET CONFIGURATION
+
+########## SCHEMA CONFIGURATIONS
+SCHEMA = ''
+########## SCHEMA END CONFIGURATIONS
