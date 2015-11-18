@@ -31,13 +31,13 @@ def filter_daily_total(queryset, context, qualif=False):
             estado=context['uf']
         )
 
-    if not qualif: 
+    if not qualif:
         return queryset.values('data_imagem')\
             .annotate(
                 total=Sum('area_km2'),
             ).annotate(
                 dia=RawSQL("EXTRACT(day FROM data_imagem)", ())
-            )
+            ).order_by('dia')
     # else:
     #     if context['estagio'] == 'degradacao':
     #         return queryset.values('mes_ano')\
@@ -67,7 +67,7 @@ def filter_montly_total(queryset, context, qualif=False):
             estado=context['uf']
         )
 
-    if not qualif: 
+    if not qualif:
         return queryset.extra(select={'mes_id': 'select EXTRACT(month from data_imagem)'}).values('mes_id')\
             .annotate(
                 total=Sum('area_km2'),
@@ -137,7 +137,7 @@ def filter_uf_total(queryset, context, qualif=False):
         )
 
 
-    if not qualif: 
+    if not qualif:
         return queryset.values('estado','estagio')\
             .annotate(
                 total=Sum('area_km2'),
@@ -188,7 +188,7 @@ def filter_uf_nuvem(queryset, context):
 
 
 def filter_uf_periodo_mensal(queryset, context, periodo):
-    
+
 
     if 'tipo' in context and context['tipo']:
 
@@ -202,8 +202,8 @@ def filter_uf_periodo_mensal(queryset, context, periodo):
         # if tipo == 'DETER_QUALIF' or  tipo == 'AWIFS' or tipo == 'DETER':
         # queryset = queryset.filter(
         #     periodo_prodes=periodo
-        # )                
-                
+        # )
+
         if 'ano' in context and context['ano']:
             queryset = queryset.filter(
                 ano=context['ano']
