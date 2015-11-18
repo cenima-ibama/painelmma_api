@@ -37,7 +37,7 @@ def filter_daily_total(queryset, context, qualif=False):
                 total=Sum('area_km2'),
             ).annotate(
                 dia=RawSQL("EXTRACT(day FROM data_imagem)", ())
-            )
+            ).order_by('dia')
     # else:
     #     if context['estagio'] == 'degradacao':
     #         return queryset.values('mes_ano')\
