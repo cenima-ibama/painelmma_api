@@ -171,7 +171,7 @@ class TaxaProdes(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'taxa_prodes'
+        db_table = 'public\".\"taxa_prodes'
 
     def total(self):
         return self.ac + self.am + self.ap + self.ma + self.mt + self.pa + self.ro + self.rr + self.to
