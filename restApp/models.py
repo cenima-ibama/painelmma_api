@@ -169,9 +169,9 @@ class TaxaProdes(models.Model):
     rr = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=False)
     to = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=False)
 
-    #class Meta:
-        #managed = False
-        #db_table = 'public\".\"taxa_prodes'
+    class Meta:
+        managed = False
+        db_table = 'taxa_prodes'
 
     def total(self):
         return self.ac + self.am + self.ap + self.ma + self.mt + self.pa + self.ro + self.rr + self.to
