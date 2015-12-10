@@ -5,6 +5,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField, B
 from django.db.models import Sum, Count
 
 from .models import *
+from loginApp.models import UserPermited
 
 from .utils import get_reverse_month, belongs_prodes, get_prodes
 from .filter_functions import *
@@ -41,6 +42,21 @@ class DailyAlertaDeterSerializer(ModelSerializer):
         return queryset
 
 
+class PublicAlertaDeterSerializer(ModelSerializer):
+    data = SerializerMethodField()
+
+    class Meta:
+        model = PublicAlertaDeter
+        fields = ['data']
+
+    def get_data(self, obj):
+        queryset = PublicAlertaDeter.objects.values('data_imagem', 'area_km2')
+        queryset = filter_daily_total(
+            queryset, self.context['request'].GET
+        )
+        return queryset
+
+
 class DailyAlertaDeterQualifSerializer(ModelSerializer):
     data = SerializerMethodField()
 
@@ -59,14 +75,20 @@ class DailyAlertaDeterQualifSerializer(ModelSerializer):
 class MontlySerializer(BaseSerializer):
     def to_representation(self, obj):
         tipo = self.context['request'].GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
         isQualif = False;
 
-        if tipo == 'AWIFS':
+        if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects.filter(periodo_prodes=obj)
-        elif tipo == 'DETER':
+        elif tipo == 'DETER' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects.filter(periodo_prodes=obj)
-        elif tipo == 'DETER_QUALIF':
+        elif tipo == 'DETER' and not permited:
+            queryset = PublicAlertaDeter.objects.filter(periodo_prodes=obj)
+        elif tipo == 'DETER_QUALIF' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeterQualif.objects.filter(periodo_prodes=obj)
+            isQualif = True;
+        elif tipo == 'DETER_QUALIF' and not permited:
+            queryset = PublicAlertaDeterQualif.objects.filter(periodo_prodes=obj)
             isQualif = True;
 
 
@@ -94,19 +116,24 @@ class IndiceSerializer(BaseSerializer):
         seriesRange.reverse()
 
         periodos = [get_prodes(mes, ano, i + 1) for i in seriesRange]
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
         # periodos = [str(2015 - i) + '-' + str(2016-i) for i in range(0,series)]
         # periodos = ['2015-2016','2014-2015'];
 
         data = []
 
         for per in periodos:
-            if tipo == 'AWIFS':
+            if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
                 queryset = DailyAlertaAwifs.objects.filter(periodo_prodes=per)
                 hasStage = True;
-            elif tipo == 'DETER':
+            elif tipo == 'DETER' and self.context['request'].user.is_authenticated() and permited:
                 queryset = DailyAlertaDeter.objects.filter(periodo_prodes=per)
-            elif tipo == 'DETER_QUALIF':
+            elif tipo == 'DETER' and not permited:
+                queryset = PublicAlertaDeter.objects.filter(periodo_prodes=per)
+            elif tipo == 'DETER_QUALIF' and self.context['request'].user.is_authenticated() and permited:
                 queryset = DailyAlertaDeterQualif.objects.filter(periodo_prodes=per)
+            elif tipo == 'DETER_QUALIF' and not permited:
+                queryset = PublicAlertaDeterQualif.objects.filter(periodo_prodes=per)
 
             if obj == 'Diferença':
                 queryset = filter_indice_total(queryset, self.context['request'].GET, hasStage)
@@ -137,12 +164,16 @@ class IndiceSerializer(BaseSerializer):
 class UFSerializer(BaseSerializer):
     def to_representation(self, obj):
         tipo = self.context['request'].GET.get('tipo', None)
+        logged = self.context['request'].GET.get('logged', False)
         isQualif = False;
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
-        if tipo == 'AWIFS':
+        if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects.filter(periodo_prodes=obj)
-        elif tipo == 'DETER' or 'DETER_QUALIF':
+        elif (tipo == 'DETER' or 'DETER_QUALIF') and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects.filter(periodo_prodes=obj)
+        elif (tipo == 'DETER' or 'DETER_QUALIF') and not permited:
+            queryset = PublicAlertaDeter.objects.filter(periodo_prodes=obj)
         # elif tipo == 'DETER_QUALIF':
         #     queryset = DailyAlertaDeterQualif.objects.filter(periodo_prodes=obj)
         #     isQualif = True;
@@ -161,6 +192,7 @@ class UFSerializer(BaseSerializer):
 class AcumuladoSerializer(BaseSerializer):
     def to_representation(self, obj):
         uf = self.context['request'].GET.get('uf', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
         if obj == 'PRODES':
             # queryset = list(TaxaProdes.objects.all().order_by('-ano_prodes')[:13])
@@ -175,19 +207,29 @@ class AcumuladoSerializer(BaseSerializer):
             queryset = list(queryset[:13])
             queryset.reverse()
 
-        elif obj == 'DETER':
+        elif obj == 'DETER' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
             queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('periodo_prodes')
 
-        elif obj == 'AWIFS':
+        elif obj == 'DETER' and not permited:
+            queryset = PublicAlertaDeter.objects
+            queryset = filter_acumulado_uf(
+                queryset, self.context['request'].GET
+            )
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('periodo_prodes')
+
+        elif obj == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
             queryset = queryset.filter(estagio='Corte Raso').values('periodo_prodes').annotate(total=Sum('area_km2'))
+
+        elif obj == 'AWIFS' and not permited:
+            queryset = []
 
 
         return {
@@ -211,17 +253,28 @@ class UFComparativoSerializer(BaseSerializer):
         # prodes = '2015-2016'
         # prodes = str(2015 + int(indice)) + '-' + str(2016 + int(indice))
         prodes = get_prodes(mes, ano, indice)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
 
-        if obj == 'AWIFS':
+        if obj == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects.all().filter(periodo_prodes=prodes,estagio='Corte Raso')
             queryset = filter_uf_comparativo(
                 queryset, self.context['request'].GET
             )
             queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
 
-        elif obj == 'DETER':
+        if obj == 'AWIFS' and not permited:
+            queryset = []
+
+        elif obj == 'DETER' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects.all().filter(periodo_prodes=prodes)
+            queryset = filter_uf_comparativo(
+                queryset, self.context['request'].GET
+            )
+            queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
+
+        elif obj == 'DETER' and not permited:
+            queryset = PublicAlertaDeter.objects.all().filter(periodo_prodes=prodes)
             queryset = filter_uf_comparativo(
                 queryset, self.context['request'].GET
             )
@@ -232,9 +285,9 @@ class UFComparativoSerializer(BaseSerializer):
 
             if len(queryset) > 0:
                 if uf != '':
-                    queryset = [{'estado': uf.lower(), 'total': round(getattr(i,uf.lower()),2)} for i in queryset]
+                    queryset = [{'estado': uf, 'total': round(getattr(i,uf.lower()),2)} for i in queryset]
                 else:
-                    queryset = [[{'total': round(getattr(i,p),2),'estado': p} for p in i.attributes()] for i in queryset]
+                    queryset = [[{'total': round(getattr(i,p),2),'estado': p.upper()} for p in i.attributes()] for i in queryset]
                 
                 queryset = list(queryset[:1])[0]
             else:
@@ -282,11 +335,15 @@ class NuvemSerializer(BaseSerializer):
 class UFPeriodoSerializer(BaseSerializer):
     def to_representation(self, obj):
         tipo = self.context['request'].GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
-        if tipo == 'DETER' or tipo == 'DETER_QUALIF':
+        if (tipo == 'DETER' or tipo == 'DETER_QUALIF') and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects.all().filter(periodo_prodes=obj)
             queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
-        elif tipo == 'AWIFS':
+        if (tipo == 'DETER' or tipo == 'DETER_QUALIF') and not permited:
+            queryset = PublicAlertaDeter.objects.all().filter(periodo_prodes=obj)
+            queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
+        elif tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             estagio = self.context['request'].GET.get('estagio', None)
             queryset = DailyAlertaAwifs.objects.all().filter(periodo_prodes=obj).filter(estagio=estagio)
             queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
@@ -297,14 +354,21 @@ class UFPeriodoSerializer(BaseSerializer):
 class UFMesPeriodoSerializer(BaseSerializer):
     def to_representation(self, obj):
         tipo = self.context['request'].GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
-        if tipo == 'DETER' or tipo == 'DETER_QUALIF':
+        if (tipo == 'DETER' or tipo == 'DETER_QUALIF') and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects.all()
             queryset = filter_uf_periodo_mensal(
                 queryset, self.context['request'].GET, obj
             )
             queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
-        elif tipo == 'AWIFS':
+        if (tipo == 'DETER' or tipo == 'DETER_QUALIF') and not permited:
+            queryset = PublicAlertaDeter.objects.all()
+            queryset = filter_uf_periodo_mensal(
+                queryset, self.context['request'].GET, obj
+            )
+            queryset = queryset.values('estado').annotate(total=Sum('area_km2'))
+        elif tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects.all()
             queryset = filter_uf_periodo_mensal(
                 queryset, self.context['request'].GET, obj

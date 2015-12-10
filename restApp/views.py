@@ -2,6 +2,7 @@ from rest_framework.generics import ListAPIView
 
 #from .models import DailyAlertaAwifs, DailyAlertaDeter
 from .serializers import *
+from loginApp.models import UserPermited
 
 
 class grafico1(ListAPIView):
@@ -9,12 +10,18 @@ class grafico1(ListAPIView):
 
     def get_serializer_class(self):
         tipo = self.request.GET.get('tipo', None)
-        if tipo == 'AWIFS':
+        permited = bool(UserPermited.objects.filter(username=self.request.user.username))
+
+        if tipo == 'AWIFS' and self.request.user.is_authenticated() and permited:
             serializer_class = DailyAlertaAwifsSerializer
-        elif tipo == 'DETER':
+        elif tipo == 'DETER' and self.request.user.is_authenticated() and permited:
             serializer_class = DailyAlertaDeterSerializer
-        elif tipo == 'DETER_QUALIF':
+        elif tipo == 'DETER' and not permited:
+            serializer_class = PublicAlertaDeterSerializer
+        elif tipo == 'DETER_QUALIF' and self.request.user.is_authenticated() and permited:
             serializer_class = DailyAlertaDeterSerializer
+        elif tipo == 'DETER_QUALIF' and not permited:
+            serializer_class = PublicAlertaDeterSerializer
 
         return serializer_class
 
@@ -150,3 +157,5 @@ class grafico9(ListAPIView):
         serializer_class = UFMesPeriodoSerializer
 
         return serializer_class
+
+     

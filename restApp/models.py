@@ -117,6 +117,33 @@ class DailyAlertaDeterQualif(models.Model):
             pass
 
 
+class PublicAlertaDeterQualif(models.Model):
+    objectid = models.AutoField(primary_key=True)
+    periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
+    mes = models.CharField(max_length=10, blank=True, null=True)
+    ano = models.SmallIntegerField(blank=True, null=True)
+    mes_ano = models.CharField(max_length=6, blank=True, null=True)
+    cicatriz_fogo = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    corte_raso_deter = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    degradacao_deter = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    alta = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    leve = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    moderada = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    falso_positivo = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    nao_avaliado = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    deter_total = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    total_avaliado = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    porc_area_avaliada = models.SmallIntegerField(blank=True, null=True)
+    mesid = models.TextField(blank=True, null=True)
+
+    class Meta:
+        try:
+            db_table = '%s\".\"vw_publica_deter_qualificado' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
+
+
 class PublicAlertaDeter(models.Model):
     objectid = models.AutoField(primary_key=True)
     mes = models.CharField(max_length=10, blank=True, null=True)
@@ -148,6 +175,7 @@ class PublicAlertaDeter(models.Model):
     shape = models.GeometryField(blank=True, null=True)
     veg_sec = models.CharField(max_length=100, blank=True, null=True)
     periodo_prodes = models.CharField(max_length=10, blank=True, null=True)
+    mesid = models.TextField(blank=True, null=True)
 
     class Meta:
         try:
@@ -207,8 +235,7 @@ class TaxaNuvens(models.Model):
 
     def __str__(self):
         return str(self.mes) + "/" + str(self.ano) + "('" + str(self.porc_area_km2) + "')"
-
-
+        
 
 def prodes_filter(queryset, year, month):
     monthList = ['01','02','03','04','05','06','07','08','09','10','11','12']

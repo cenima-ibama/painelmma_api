@@ -21,6 +21,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('restApp.urls', namespace='api')),
+    url(r'^login/', include('loginApp.urls', namespace='api')),
     #url(r'^estatisticas/(?P<tipo>\w+)$',
         #grafico1.as_view(),
         #name='grafico1'),

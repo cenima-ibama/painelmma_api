@@ -187,7 +187,7 @@ DJANGO_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
@@ -203,6 +203,7 @@ DJANGO_APPS = (
 # Apps specific for this project go here.
 LOCAL_APPS = (
     'restApp',
+    'loginApp',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -212,6 +213,7 @@ INSTALLED_APPS += (
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'django_python3_ldap',
 )
 ########## END APP CONFIGURATION
 

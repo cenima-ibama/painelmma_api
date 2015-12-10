@@ -28,12 +28,22 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
+        'NAME': 'siscom',
+        'USER': 'caio',
+        'PASSWORD': 'caio',
+        'HOST': 'localhost',
+    },
+    'siscom_db': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'siscom',
+        'USER': 'painel',
+        'PASSWORD': 'db!p41n3l',
+        'HOST': '10.1.8.58',
     }
 }
+
+SCHEMA = 'ibama'
+DATABASE_ROUTERS = ['restApp.dbrouters.SiscomRouter']
 
 ########## END DATABASE CONFIGURATION
 
@@ -47,6 +57,27 @@ CACHES = {
 }
 ########## END CACHE CONFIGURATION
 
+AUTH_USER_MODEL = 'loginApp.LDAPUser'
+# ########## LDAP CONFIG
+LDAP_AUTH_URL = 'ldap://10.1.25.17:389'
+LDAP_AUTH_USE_TLS = False
+LDAP_AUTH_SEARCH_BASE = 'ou=Users,ou=ibama,o=redegoverno,c=br'
+LDAP_AUTH_USER_FIELDS = {
+    "username": "uid",
+    "name": "cn",
+    #"last_name": "sn",
+    "email": "mail",
+}
+LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
+# LDAP_AUTH_CLEAN_USER_DATA = clean_user_data
+# END LDAP CONFIG
+
+# AUTH BACKEND CONFIG
+AUTHENTICATION_BACKENDS = (
+    'django_python3_ldap.auth.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+########## END AUTH BACKEND CONFIG
 
 ########## TOOLBAR CONFIGURATION
 # See: http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup
