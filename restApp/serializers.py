@@ -7,7 +7,7 @@ from django.db.models import Sum, Count
 from .models import *
 from loginApp.models import UserPermited
 
-from .utils import get_reverse_month, belongs_prodes, get_prodes
+from .utils import get_reverse_month, belongs_prodes, get_prodes,get_month
 from .filter_functions import *
 
 
@@ -195,8 +195,6 @@ class AcumuladoSerializer(BaseSerializer):
         permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
 
         if obj == 'PRODES':
-            # queryset = list(TaxaProdes.objects.all().order_by('-ano_prodes')[:13])
-            # queryset.reverse()
             queryset = TaxaProdes.objects.all().order_by('-ano_prodes')
 
             if uf != '':
@@ -377,3 +375,55 @@ class UFMesPeriodoSerializer(BaseSerializer):
 
 
         return {'data': queryset.order_by('total')}
+
+
+class ComparativoPeriodosSerializer(BaseSerializer):
+    def to_representation(self,obj):
+
+        tipo = self.context['request'].GET.get('tipo', None)
+        estagio = self.context['request'].GET.get('estagio', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
+
+        if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
+            queryset = DailyAlertaAwifs.objects.all().filter(estagio=estagio)
+            queryset = filter_comparativo(
+                queryset, self.context['request'].GET, obj
+            )
+            queryset = queryset.values('ano').annotate(total=Sum('area_km2'))
+        
+        elif tipo == 'DETER':
+            if self.context['request'].user.is_authenticated() and permited:
+                queryset = DailyAlertaDeter.objects.all()
+
+            elif not permited:
+                queryset = PublicAlertaDeter.objects.all()
+
+            queryset = filter_comparativo(
+                queryset, self.context['request'].GET, obj
+            )
+            queryset = queryset.values('ano').annotate(total=Sum('area_km2'))
+
+
+        elif tipo == 'DETER_QUALIF':        
+            if self.context['request'].user.is_authenticated() and permited:
+                queryset = DailyAlertaDeterQualif.objects.all()
+        
+            elif not permited:
+                queryset = PublicAlertaDeterQualif.objects.all()
+
+            queryset = filter_comparativo(
+                queryset, self.context['request'].GET, obj, True
+            )
+
+            if estagio == 'Corte Raso':
+                queryset = queryset.values('ano').annotate(total=Sum('corte_raso_deter'))
+            elif estagio == 'Cicatriz de Queimada':
+                queryset = queryset.values('ano').annotate(total=Sum('cicatriz_fogo'))
+            elif estagio == 'Degradação':
+                queryset = queryset.values('ano').annotate(total=Sum('degradacao_deter'))
+
+
+        if queryset.first():
+            return queryset.first()
+        else:
+            return {'ano': obj, 'total': 0.0}

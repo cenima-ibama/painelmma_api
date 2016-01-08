@@ -225,3 +225,24 @@ def filter_uf_periodo_mensal(queryset, context, periodo):
         #     )
 
     return queryset
+
+def filter_comparativo(queryset, context, ano, qualif=False):
+    # queryset = DailyAlertaAwifs.objects.all().filter(ano=obj, mes=get_month(int(mes)), estado=uf, estagio=estagio)
+    if 'ano':
+        queryset = queryset.filter(
+            ano=ano
+        )
+    if 'mes' in context and context['mes'] and not qualif:
+        queryset = queryset.filter(
+            mes=get_month(int(context['mes']))
+        )
+    if 'mes' in context and context['mes'] and qualif:
+        queryset = queryset.filter(
+            mes=int(context['mes'])
+        )
+    if 'uf' in context and context['uf'] and not qualif:
+        queryset = queryset.filter(
+            estado=context['uf']
+        )
+
+    return queryset

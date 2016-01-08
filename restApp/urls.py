@@ -3,7 +3,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from django.conf.urls import patterns, url
 
-from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9
+from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9, gauge1
 
 
 urlpatterns = patterns('',
@@ -34,6 +34,9 @@ urlpatterns = patterns('',
     ),
     url(r'^uf_mes_periodo/$',
         grafico9.as_view()
+    ),
+    url(r'^comparativo/$',
+        gauge1.as_view()
     ),
 )
 

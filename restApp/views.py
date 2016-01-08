@@ -159,3 +159,14 @@ class grafico9(ListAPIView):
         return serializer_class
 
      
+class gauge1(ListAPIView):
+    def get_queryset(self):
+        ano = self.request.GET.get('ano', None)
+        return [int(ano)-1, int(ano)]
+
+    def get_serializer_class(self):
+        serializer_class = ComparativoPeriodosSerializer
+
+        return serializer_class
+
+     
