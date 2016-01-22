@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, BaseSerializer
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from django.db.models import Sum, Count
 
@@ -427,3 +428,55 @@ class ComparativoPeriodosSerializer(BaseSerializer):
             return queryset.first()
         else:
             return {'ano': obj, 'total': 0.0}
+
+
+class MapaSerializer(GeoFeatureModelSerializer):
+
+    class Meta:
+        model = PublicAlertaDeter
+        geo_field = 'shape'
+
+    # def to_representation(self, obj):
+    #     tipo = self.context['request'].GET.get('tipo', None)
+    #     estagio = self.context['request'].GET.get('estagio', None)
+    #     permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
+
+    #     if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
+    #         queryset = DailyAlertaAwifs.objects.all().filter(estagio=estagio)
+    #         queryset = filter_mapa(
+    #             queryset, self.context['request'].GET
+    #         )
+    #         queryset = queryset.values('shape')
+        
+    #     elif tipo == 'DETER':
+    #         if self.context['request'].user.is_authenticated() and permited:
+    #             queryset = DailyAlertaDeter.objects.all()
+
+    #         elif not permited:
+    #             queryset = PublicAlertaDeter.objects.all()
+
+    #         queryset = filter_mapa(
+    #             queryset, self.context['request'].GET
+    #         )
+    #         queryset = queryset.values('shape')
+
+
+    #     elif tipo == 'DETER_QUALIF':        
+    #         if self.context['request'].user.is_authenticated() and permited:
+    #             queryset = DailyAlertaDeterQualif.objects.all()
+        
+    #         elif not permited:
+    #             queryset = PublicAlertaDeterQualif.objects.all()
+
+    #         queryset = filter_mapa(
+    #             queryset, self.context['request'].GET, True
+    #         )
+
+    #         if estagio == 'Corte Raso':
+    #             queryset = queryset.values('ano').annotate(total=Sum('corte_raso_deter'))
+    #         elif estagio == 'Cicatriz de Queimada':
+    #             queryset = queryset.values('ano').annotate(total=Sum('cicatriz_fogo'))
+    #         elif estagio == 'Degradação':
+    #             queryset = queryset.values('ano').annotate(total=Sum('degradacao_deter'))
+
+    #     return queryset

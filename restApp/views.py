@@ -4,6 +4,9 @@ from rest_framework.generics import ListAPIView
 from .serializers import *
 from loginApp.models import UserPermited
 
+from .filter_functions import filter_mapa
+from .utils import create_list
+
 
 class grafico1(ListAPIView):
     queryset = [0]
@@ -150,7 +153,6 @@ class grafico8(ListAPIView):
 
 
 class grafico9(ListAPIView):
-    # queryset = ['2015-2016']
     queryset = [0]
 
     def get_serializer_class(self):
@@ -166,6 +168,60 @@ class gauge1(ListAPIView):
 
     def get_serializer_class(self):
         serializer_class = ComparativoPeriodosSerializer
+
+        return serializer_class
+
+     
+class mapa(ListAPIView):
+
+    def get_queryset(self):
+        tipo = self.request.GET.get('tipo', None)
+        estagio = self.request.GET.get('estagio', None)
+        permited = bool(UserPermited.objects.filter(username=self.request.user.username))
+
+        if tipo == 'AWIFS' and self.request.user.is_authenticated() and permited:
+            queryset = DailyAlertaAwifs.objects.all().filter(estagio=estagio)
+            queryset = filter_mapa(
+                queryset, self.request.GET.arguments()
+            )
+            queryset = queryset.values('shape')
+        
+        elif tipo == 'DETER':
+            if self.request.user.is_authenticated() and permited:
+                queryset = DailyAlertaDeter.objects.all()
+
+            elif not permited:
+                queryset = PublicAlertaDeter.objects.all()
+
+            queryset = filter_mapa(
+                queryset, self.request.GET.arguments()
+            )
+            queryset = queryset.values('shape')
+
+
+        elif tipo == 'DETER_QUALIF':        
+            if self.request.user.is_authenticated() and permited:
+                queryset = DailyAlertaDeterQualif.objects.all()
+        
+            elif not permited:
+                queryset = PublicAlertaDeterQualif.objects.all()
+
+            queryset = filter_mapa(
+                queryset, self.request.GET.arguments(), True
+            )
+
+            if estagio == 'Corte Raso':
+                queryset = queryset.values('ano').annotate(total=Sum('corte_raso_deter'))
+            elif estagio == 'Cicatriz de Queimada':
+                queryset = queryset.values('ano').annotate(total=Sum('cicatriz_fogo'))
+            elif estagio == 'Degradação':
+                queryset = queryset.values('ano').annotate(total=Sum('degradacao_deter'))
+
+        return queryset
+
+
+    def get_serializer_class(self):
+        serializer_class = MapaSerializer
 
         return serializer_class
 

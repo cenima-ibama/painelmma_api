@@ -64,3 +64,7 @@ def get_prodes(mes, ano, indice=0):
         return str(int(ano) + int(indice)) + '-' + str(int(ano) + int(indice) + 1)
     else:
         return str(int(ano) + int(indice) - 1) + '-' + str(int(ano) + int(indice))
+
+
+def create_list(value):
+    return [v for v in value]

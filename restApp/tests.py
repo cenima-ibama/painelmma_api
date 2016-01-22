@@ -153,3 +153,13 @@ class TestDiarioQualif(APITestCase):
     def test_response(self):
         response = get_response(self.client, self.url, self.params)
         self.assertEqual(response.status_code, 200)
+
+
+# class TestMapa(APITestCase):
+
+#     def setUp(self):
+#         self.url = reverse('api:mapa')
+
+#     def test_response(self):
+#         response = get_response(self.client, self.url)
+#         self.assertEqual(response.status_code, 200)
