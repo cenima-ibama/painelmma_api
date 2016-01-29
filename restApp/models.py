@@ -116,6 +116,9 @@ class DailyAlertaDeterQualif(models.Model):
         except AttributeError:
             pass
 
+    def __str__(self):
+        return str(self.mes) + "/" + str(self.ano)
+
 
 class PublicAlertaDeterQualif(models.Model):
     objectid = models.AutoField(primary_key=True)
@@ -142,6 +145,9 @@ class PublicAlertaDeterQualif(models.Model):
             managed = False
         except AttributeError:
             pass
+
+    def __str__(self):
+        return str(self.mes) + '/' + str(self.ano)
 
 
 class PublicAlertaDeter(models.Model):

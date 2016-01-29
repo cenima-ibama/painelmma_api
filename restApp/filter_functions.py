@@ -249,13 +249,15 @@ def filter_comparativo(queryset, context, ano, qualif=False):
 
 def filter_mapa(queryset, context, qualif=False):
     # queryset = DailyAlertaAwifs.objects.all().filter(ano=obj, mes=get_month(int(mes)), estado=uf, estagio=estagio)
-    ano = context.get('ano')
-    mes = context.get('mes')
-    uf = context.get('uf')
+    ano = context['ano']
+    mes = context['mes']
+    uf = context['uf']
+
+    # queryset = queryset.all()
 
     if ano:
         queryset = queryset.filter(
-            ano=ano
+            ano=str(ano)
         )
     if mes and not qualif:
         queryset = queryset.filter(
@@ -265,9 +267,27 @@ def filter_mapa(queryset, context, qualif=False):
         queryset = queryset.filter(
             mes=int(mes)
         )
-    if uf and not qualif:
+    if uf:
         queryset = queryset.filter(
             estado=uf
         )
 
+    # if ano:
+    #     queryset = queryset.filter(
+    #         ano='2015'
+    #     )
+    # if mes and not qualif:
+    #     queryset = queryset.filter(
+    #         mes='10'
+    #     )
+    # if mes and qualif:
+    #     queryset = queryset.filter(
+    #         mes='OUTUBRO'
+    #     )
+    # if uf and not qualif:
+    #     queryset = queryset.filter(
+    #         estado=''
+    #     )
+
+    # return {'ano': ano}
     return queryset

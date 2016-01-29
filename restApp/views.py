@@ -182,11 +182,11 @@ class mapa(ListAPIView):
         if tipo == 'AWIFS' and self.request.user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects.all().filter(estagio=estagio)
             queryset = filter_mapa(
-                queryset, self.request.GET.arguments()
+                queryset, self.request.GET
             )
-            queryset = queryset.values('shape')
+            queryset = queryset
         
-        elif tipo == 'DETER':
+        elif tipo == 'DETER' or tipo == 'DETER_QUALIF':
             if self.request.user.is_authenticated() and permited:
                 queryset = DailyAlertaDeter.objects.all()
 
@@ -194,34 +194,24 @@ class mapa(ListAPIView):
                 queryset = PublicAlertaDeter.objects.all()
 
             queryset = filter_mapa(
-                queryset, self.request.GET.arguments()
+                queryset, self.request.GET
             )
-            queryset = queryset.values('shape')
-
-
-        elif tipo == 'DETER_QUALIF':        
-            if self.request.user.is_authenticated() and permited:
-                queryset = DailyAlertaDeterQualif.objects.all()
-        
-            elif not permited:
-                queryset = PublicAlertaDeterQualif.objects.all()
-
-            queryset = filter_mapa(
-                queryset, self.request.GET.arguments(), True
-            )
-
-            if estagio == 'Corte Raso':
-                queryset = queryset.values('ano').annotate(total=Sum('corte_raso_deter'))
-            elif estagio == 'Cicatriz de Queimada':
-                queryset = queryset.values('ano').annotate(total=Sum('cicatriz_fogo'))
-            elif estagio == 'Degradação':
-                queryset = queryset.values('ano').annotate(total=Sum('degradacao_deter'))
+            queryset = queryset
 
         return queryset
 
 
     def get_serializer_class(self):
-        serializer_class = MapaSerializer
+        tipo = self.request.GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.request.user.username))
+
+        if tipo == 'AWIFS' and self.request.user.is_authenticated() and permited:
+            serializer_class = DailyAwifsSerializer
+        elif tipo == 'DETER' or tipo == 'DETER_QUALIF':
+            if self.request.user.is_authenticated() and permited:
+                serializer_class = DailyDeterSerializer
+            elif not permited:
+                serializer_class = PublicDeterSerializer
 
         return serializer_class
 
