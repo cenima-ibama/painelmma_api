@@ -52,7 +52,7 @@ def get_reverse_month(month):
         month = 11
     elif month == 'DEZEMBRO':
         month = 12
-    return month
+    return int(month)
 
 
 def belongs_prodes(qs,prodes):

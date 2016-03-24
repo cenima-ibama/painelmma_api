@@ -3,7 +3,9 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from django.conf.urls import patterns, url
 
-from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9, gauge1, mapa
+from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9
+from .views import gauge1
+from .views import mapa
 
 
 urlpatterns = patterns('',
@@ -12,7 +14,8 @@ urlpatterns = patterns('',
         name="estatisticas-diario"
     ),
     url(r'^mensal/$',
-        grafico2.as_view()
+        grafico2.as_view(),
+        name="estatisticas-mensal"
     ),
     url(r'^indice/$',
         grafico3.as_view()
