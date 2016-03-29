@@ -241,7 +241,30 @@ class TaxaNuvens(models.Model):
 
     def __str__(self):
         return str(self.mes) + "/" + str(self.ano) + "('" + str(self.porc_area_km2) + "')"
-        
+
+
+class TaxaNuvensAml(models.Model):
+    objectid = models.AutoField(primary_key=True)
+    data_src = models.DateTimeField(blank=True, null=True)
+    f_area = models.DecimalField(max_digits=38, decimal_places=8, blank=True, null=True)
+    porc_area_km2 = models.DecimalField(max_digits=38, decimal_places=8, blank=True, null=True, db_column='percent') 
+    mes = models.TextField(blank=True, null=True, db_column='mes_maiusc')
+    ano = models.SmallIntegerField(blank=True, null=True)
+    # mes_convert = get_reverse_month(str(mes))
+
+    class Meta:
+        try:
+            db_table = '%s\".\"vw_taxa_nuvem_aml' % settings.SCHEMA
+            managed = False
+        except AttributeError:
+            pass
+
+    # def mes(self):
+    #     return get_reverse_month(self.mes_maiusc)
+
+    # def porc_area_km2(self):
+    #     return round(self.percent * 100)
+
 
 def prodes_filter(queryset, year, month):
     monthList = ['01','02','03','04','05','06','07','08','09','10','11','12']

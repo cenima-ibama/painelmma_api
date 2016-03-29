@@ -32,7 +32,7 @@ def get_reverse_month(month):
         month = 1
     elif month == 'FEVEREIRO':
         month = 2
-    elif month == 'MARCO':
+    elif month == 'MARCO' or month == 'MARÇO':
         month = 3
     elif month == 'ABRIL':
         month = 4

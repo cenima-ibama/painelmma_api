@@ -314,16 +314,36 @@ class NuvemSerializer(BaseSerializer):
     def to_representation(self, obj):
         
         prodes = [int(obj.split('-')[0]), int(obj.split('-')[1])]
+        uf = self.context['request'].GET.get('uf', None)
+        queryset = None
 
-        queryset = TaxaNuvens.objects.all()
+        if (uf):
+            queryset = TaxaNuvens.objects.all()   
+        else:
+            queryset = TaxaNuvensAml.objects.all()             
 
         queryset = filter_uf_nuvem(
             queryset, self.context['request'].GET
         )
 
-        queryset = queryset.values('mes','ano').annotate(porc=Sum('porc_area_km2')).annotate(uf_count=Count('uf'))
+        if (uf):
+            queryset = queryset.values('mes','ano', 'porc_area_km2').filter(uf=uf)
+            # queryset = [{'mes': get_reverse_month(qs['mes']),'total': int(qs['porc_area_km2'])} for qs in queryset if belongs_prodes(qs,prodes)]
+        else:
+            queryset = queryset.values('mes','ano', 'porc_area_km2')
+            # queryset = [{'mes': get_reverse_month(qs['mes']),'total': int(qs['porc_area_km2'] * 100)} for qs in queryset if belongs_prodes(qs,prodes)]
+        
+        queryset = [{'mes': get_reverse_month(qs['mes']),'total': int(qs['porc_area_km2'])} for qs in queryset if belongs_prodes(qs,prodes)]
 
-        queryset = [{'mes': get_reverse_month(qs['mes']),'total': round(int(qs['porc']) / qs['uf_count'],2)} for qs in queryset if belongs_prodes(qs,prodes)]
+
+        # else:
+        #     queryset = TaxaNuvensAml.objects.all()        
+
+        #     queryset = filter_uf_nuvem(
+        #         queryset, self.context['request'].GET
+        #     )
+
+        #     queryset = queryset.values('mes','ano', 'porc_area_km2').filter(uf=uf)
 
         return {
             'taxa': obj,
