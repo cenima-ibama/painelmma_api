@@ -4,6 +4,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField, B
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from django.db.models import Sum, Count
+from decimal import *
 
 from .models import *
 from loginApp.models import UserPermited
@@ -211,14 +212,14 @@ class AcumuladoSerializer(BaseSerializer):
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
-            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('periodo_prodes')
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
 
         elif obj == 'DETER' and not permited:
             queryset = PublicAlertaDeter.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
-            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('periodo_prodes')
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
 
         elif obj == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects
@@ -333,7 +334,7 @@ class NuvemSerializer(BaseSerializer):
             queryset = queryset.values('mes','ano', 'porc_area_km2')
             # queryset = [{'mes': get_reverse_month(qs['mes']),'total': int(qs['porc_area_km2'] * 100)} for qs in queryset if belongs_prodes(qs,prodes)]
         
-        queryset = [{'mes': get_reverse_month(qs['mes']),'total': int(qs['porc_area_km2'])} for qs in queryset if belongs_prodes(qs,prodes)]
+        queryset = [{'mes': get_reverse_month(qs['mes']),'total': (int(qs['porc_area_km2']) if not qs['porc_area_km2'].is_nan() else 0) } for qs in queryset if belongs_prodes(qs,prodes)]
 
 
         # else:
