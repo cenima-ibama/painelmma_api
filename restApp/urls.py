@@ -4,7 +4,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from django.conf.urls import patterns, url
 
 from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9
-from .views import gauge1
+from .views import gauge1, gauge2
 from .views import mapa
 
 
@@ -40,6 +40,9 @@ urlpatterns = patterns('',
     ),
     url(r'^comparativo/$',
         gauge1.as_view()
+    ),
+    url(r'^comparativo_prodes/$',
+        gauge2.as_view()
     ),
     url(r'^mapa/$',
         mapa.as_view(),

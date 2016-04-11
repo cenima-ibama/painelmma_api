@@ -451,6 +451,58 @@ class ComparativoPeriodosSerializer(BaseSerializer):
             return {'ano': obj, 'total': 0.0}
 
 
+class ComparativoProdesPeriodosSerializer(BaseSerializer):
+    def to_representation(self,obj):
+
+        tipo = self.context['request'].GET.get('tipo', None)
+        estagio = self.context['request'].GET.get('estagio', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
+
+        if tipo == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
+            queryset = DailyAlertaAwifs.objects.all().filter(estagio=estagio)
+            queryset = filter_comparativo_prodes(
+                queryset, self.context['request'].GET, obj
+            )
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
+        
+        elif tipo == 'DETER':
+            if self.context['request'].user.is_authenticated() and permited:
+                queryset = DailyAlertaDeter.objects.all()
+
+            elif not permited:
+                queryset = PublicAlertaDeter.objects.all()
+
+            queryset = filter_comparativo_prodes(
+                queryset, self.context['request'].GET, obj
+            )
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
+
+
+        elif tipo == 'DETER_QUALIF':        
+            if self.context['request'].user.is_authenticated() and permited:
+                queryset = DailyAlertaDeterQualif.objects.all()
+        
+            elif not permited:
+                queryset = PublicAlertaDeterQualif.objects.all()
+
+            queryset = filter_comparativo_prodes(
+                queryset, self.context['request'].GET, obj, True
+            )
+
+            if estagio == 'Corte Raso':
+                queryset = queryset.values('periodo_prodes').annotate(total=Sum('corte_raso_deter'))
+            elif estagio == 'Cicatriz de Queimada':
+                queryset = queryset.values('periodo_prodes').annotate(total=Sum('cicatriz_fogo'))
+            elif estagio == 'Degradação':
+                queryset = queryset.values('periodo_prodes').annotate(total=Sum('degradacao_deter'))
+
+
+        if queryset:
+            return queryset[0]
+        else:
+            return {'ano': obj, 'total': 0.0}
+
+
 class PublicDeterSerializer(GeoFeatureModelSerializer):
     data = SerializerMethodField()
 

@@ -172,6 +172,17 @@ class gauge1(ListAPIView):
         return serializer_class
 
      
+class gauge2(ListAPIView):
+    def get_queryset(self):
+        ano = self.request.GET.get('ano', None)
+        return [int(ano)-1, int(ano)]
+
+    def get_serializer_class(self):
+        serializer_class = ComparativoProdesPeriodosSerializer
+
+        return serializer_class
+
+     
 class mapa(ListAPIView):
 
     def get_queryset(self):

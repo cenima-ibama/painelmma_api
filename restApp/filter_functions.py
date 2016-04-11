@@ -247,6 +247,30 @@ def filter_comparativo(queryset, context, ano, qualif=False):
 
     return queryset
 
+def filter_comparativo_prodes(queryset, context, ano, qualif=False):
+    # queryset = DailyAlertaAwifs.objects.all().filter(ano=obj, mes=get_month(int(mes)), estado=uf, estagio=estagio)
+
+    #mes = int(context['mes'])
+    #prodes = ""
+
+    mes = int(context['mes']) + 5 if int(context['mes']) < 8 else int(context['mes']) - 7
+    prodes = (str(ano - 1) + "-" + str(ano)) if int(context['mes']) < 8 else (str(ano) + "-" + str(ano + 1))
+
+    if 'ano':
+        queryset = queryset.filter(
+            periodo_prodes=prodes
+        )
+    if 'mes' in context and context['mes']:
+        queryset = queryset.filter(
+            mesid__in=['{:02d}'.format(i) for i in range(1, int(mes) + 1)]
+        )
+    if 'uf' in context and context['uf'] and not qualif:
+        queryset = queryset.filter(
+            estado=context['uf']
+        )
+
+    return queryset
+
 def filter_mapa(queryset, context, qualif=False):
     # queryset = DailyAlertaAwifs.objects.all().filter(ano=obj, mes=get_month(int(mes)), estado=uf, estagio=estagio)
     ano = context['ano']
