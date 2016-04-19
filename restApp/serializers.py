@@ -205,28 +205,28 @@ class AcumuladoSerializer(BaseSerializer):
                 queryset = [{'periodo_prodes': i.ano_prodes.replace('/','-'), 'total': i.total()} for i in queryset]
 
             queryset = list(queryset[:13])
-            queryset.reverse()
+            # queryset.reverse()
 
         elif obj == 'DETER' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaDeter.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
-            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('-periodo_prodes')
 
         elif obj == 'DETER' and not permited:
             queryset = PublicAlertaDeter.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
-            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2'))
+            queryset = queryset.values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('-periodo_prodes')
 
         elif obj == 'AWIFS' and self.context['request'].user.is_authenticated() and permited:
             queryset = DailyAlertaAwifs.objects
             queryset = filter_acumulado_uf(
                 queryset, self.context['request'].GET
             )
-            queryset = queryset.filter(estagio='Corte Raso').values('periodo_prodes').annotate(total=Sum('area_km2'))
+            queryset = queryset.filter(estagio='Corte Raso').values('periodo_prodes').annotate(total=Sum('area_km2')).order_by('-periodo_prodes')
 
         elif obj == 'AWIFS' and not permited:
             queryset = []
@@ -445,8 +445,8 @@ class ComparativoPeriodosSerializer(BaseSerializer):
                 queryset = queryset.values('ano').annotate(total=Sum('degradacao_deter'))
 
 
-        if queryset.first():
-            return queryset.first()
+        if queryset:
+            return queryset[0]
         else:
             return {'ano': obj, 'total': 0.0}
 
