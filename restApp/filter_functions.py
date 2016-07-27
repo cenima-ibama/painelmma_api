@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.db.models.expressions import RawSQL
 
 from .utils import get_month
+from datetime import *
 
 
 def filter_daily_total(queryset, context, qualif=False):
@@ -315,3 +316,130 @@ def filter_mapa(queryset, context, qualif=False):
 
     # return {'ano': ano}
     return queryset
+
+def filter_cruzamento_alerta(queryset, context):
+
+    delta = None
+
+    if 'ano_inicio' in context and 'ano_fim' in context and context['ano_inicio'] and context['ano_fim']:
+        fim = context['ano_fim'].split('-')
+        inicio = context['ano_inicio'].split('-')
+
+        delta = date(int(fim[0]), int(fim[1]), int(fim[2])) - date(int(inicio[0]), int(inicio[1]), int(inicio[2]))
+    
+        if delta.days < 60:
+            queryset = queryset.extra(select={'label':"to_char(data_imagem,'DD/MM/YY')"}).values('label')
+        elif delta.days < 240:
+            queryset = queryset.extra(select={'label':"to_char(data_imagem, 'YYYY/MM')"}).values('label')
+        else:
+            queryset = queryset.extra(select={'label': 'ano'}).values('label')
+    else:
+        queryset = queryset.extra(select={'label': 'ano'}).values('label')
+
+
+
+    if 'ano_inicio' in context and 'ano_fim' in context and context['ano_inicio'] and context['ano_fim']:
+        queryset = queryset.filter(
+            data_imagem__range=[context['ano_inicio'], context['ano_fim']]
+        )
+
+    if 'tipo' in context and context['tipo']:
+        queryset = queryset.filter(
+            tipo=context['tipo']
+        )
+
+    if 'estagio' in context and context['estagio']:
+        queryset = queryset.filter(
+            estagio=context['estagio']
+        )
+
+    if 'estado' in context and context['estado']:
+        queryset = queryset.filter(
+            estado=context['estado']
+        )
+
+    if 'dominio' in context and context['dominio']:
+        queryset = queryset.filter(
+            dominio=context['dominio']
+        )
+
+    if 'area' in context and context['area']:
+        area = context['area']
+        if area == 'dominio_us':
+            queryset = queryset.filter(
+                dominio_us__isnull=False
+            )
+        elif area == 'dominio_ti':
+            queryset = queryset.filter(
+                dominio_ti__isnull=False
+            )
+        elif area == 'dominio_pi':
+            queryset = queryset.filter(
+                dominio_pi__isnull=False
+            )
+        elif area == 'dominio_as':
+            queryset = queryset.filter(
+                dominio_as__isnull=False
+            )
+        elif area == 'areas_livres':
+            queryset = queryset.filter(
+                dominio_us__isnull=True, dominio_ti__isnull=True, dominio_pi__isnull=True, dominio_as__isnull=True
+            )
+
+
+    return queryset.annotate(total=Sum('area_km2')).order_by('label')
+
+def filter_cruzamento_estadual_federal_padrao(queryset, context):
+
+    if 'ano_inicio' in context and 'ano_fim' in context and context['ano_inicio'] and context['ano_fim']:
+        queryset = queryset.filter(
+            data_imagem__range=[context['ano_inicio'], context['ano_fim']]
+        )
+
+    if 'tipo' in context and context['tipo']:
+        queryset = queryset.filter(
+            tipo=context['tipo']
+        )
+
+    if 'estagio' in context and context['estagio']:
+        queryset = queryset.filter(
+            estagio=context['estagio']
+        )
+
+    if 'estado' in context and context['estado']:
+        queryset = queryset.filter(
+            estado=context['estado']
+        )
+
+    return queryset
+
+
+def filter_cruzamento_estadual_federal_area(queryset, dominio, area):
+
+    if dominio:
+        queryset = queryset.filter(
+            dominio=dominio
+        )
+
+    if area == 'dominio_us':
+        queryset = queryset.filter(
+            dominio_us__isnull=False
+        )
+    elif area == 'dominio_ti':
+        queryset = queryset.filter(
+            dominio_ti__isnull=False
+        )
+    elif area == 'dominio_pi':
+        queryset = queryset.filter(
+            dominio_pi__isnull=False
+        )
+    elif area == 'dominio_as':
+        queryset = queryset.filter(
+            dominio_as__isnull=False
+        )
+    elif area == 'areas_livres':
+        queryset = queryset.filter(
+            dominio_us__isnull=True, dominio_ti__isnull=True, dominio_pi__isnull=True, dominio_as__isnull=True
+        )
+
+    return queryset.aggregate(total=Sum('area_km2'))

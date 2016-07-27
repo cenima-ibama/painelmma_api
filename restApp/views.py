@@ -226,4 +226,34 @@ class mapa(ListAPIView):
 
         return serializer_class
 
+
+class cruzamentoGrafico1(ListAPIView):
+    queryset = [0]
+
+    def get_serializer_class(self):
+
+        serializer_class = CruzamentoGrafico1Serializer
+
+        return serializer_class
+
+
+class cruzamentoGrafico2(ListAPIView):
+    queryset = [0]
+
+    def get_serializer_class(self):
+        # tipo = self.request.GET.get('tipo', None)
+        # permited = bool(UserPermited.objects.filter(username=self.request.user.username))
+
+        serializer_class = CruzamentoGrafico2Serializer
+        # elif tipo == 'DETER' and self.request.user.is_authenticated() and permited:
+        #     serializer_class = DailyAlertaDeterSerializer
+        # elif tipo == 'DETER' and not permited:
+        #     serializer_class = PublicAlertaDeterSerializer
+        # elif tipo == 'DETER_QUALIF' and self.request.user.is_authenticated() and permited:
+        #     serializer_class = DailyAlertaDeterSerializer
+        # elif tipo == 'DETER_QUALIF' and not permited:
+        #     serializer_class = PublicAlertaDeterSerializer
+
+        return serializer_class
+
      

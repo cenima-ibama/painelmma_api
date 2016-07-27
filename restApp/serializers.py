@@ -574,8 +574,176 @@ class DailyAwifsSerializer(GeoFeatureModelSerializer):
     #     return queryset
 
 
-# class MapaSerializer(GeoFeatureModelSerializer):
+class CruzamentoGrafico1Serializer(BaseSerializer):
+    def to_representation(self,obj):
 
-#     class Meta:
-#         model = PublicAlertaDeter
-#         geo_field = 'shape'
+        tipo = self.context['request'].GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
+
+
+        # if tipo == 'Alerta DETER' or tipo == 'Alerta AWiFS':
+        #     queryset = filter_cruzamento_alerta(
+        #         CruzamentoAlerta.objects.all(), self.context['request'].GET
+        #     )
+        # else:
+        #     queryset = [];
+        
+        if self.context['request'].user.is_authenticated() and permited:
+
+            if tipo == 'Alerta DETER':
+                queryset = filter_cruzamento_alerta(
+                    DailyAlertaDeter.objects.all(), self.context['request'].GET
+                )
+            else:
+                queryset = filter_cruzamento_alerta(
+                    DailyAlertaAwifs.objects.all(), self.context['request'].GET
+                )
+        else:
+            queryset = filter_cruzamento_alerta(
+                PublicAlertaDeter.objects.all(), self.context['request'].GET
+            )
+
+
+        return queryset
+
+
+class CruzamentoGrafico2Serializer(BaseSerializer):
+    def to_representation(self,obj):
+
+        tipo = self.context['request'].GET.get('tipo', None)
+        permited = bool(UserPermited.objects.filter(username=self.context['request'].user.username))
+
+
+        if self.context['request'].user.is_authenticated() and permited:
+            if tipo == 'Alerta DETER':
+                mid_qs = filter_cruzamento_estadual_federal_padrao(
+                    DailyAlertaDeter.objects.all(), self.context['request'].GET 
+                )            
+            # else if tipo == 'Alerta AWiFS':             
+            else:
+                mid_qs = filter_cruzamento_estadual_federal_padrao(
+                    DailyAlertaAwifs.objects.all(), self.context['request'].GET 
+                )
+
+        else:
+            mid_qs = filter_cruzamento_estadual_federal_padrao(
+                PublicAlertaDeter.objects.all(), self.context['request'].GET 
+            )
+
+
+        qs_est_as = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Estadual', 'dominio_as'
+        )
+        qs_est_pi = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Estadual', 'dominio_pi'
+        )
+        qs_est_us = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Estadual', 'dominio_us'
+        )
+        qs_est_ti = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Estadual', 'dominio_ti'
+        )
+        qs_est_al = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Estadual', 'areas_livre'
+        )
+
+
+        qs_fed_as = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Federal', 'dominio_as'
+        )
+        qs_fed_pi = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Federal', 'dominio_pi'
+        )
+        qs_fed_us = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Federal', 'dominio_us'
+        )
+        qs_fed_al = filter_cruzamento_estadual_federal_area(
+            mid_qs, 'Federal', 'areas_livre'
+        )
+
+        queryset = [{
+            'estadual': 
+            {
+                'Assentamentos': qs_est_as['total'],
+                'UC Proteção Integral': qs_est_pi['total'], 
+                'UC Uso Sustentável': qs_est_us['total'], 
+                'Terras Indígenas': qs_est_ti['total'], 
+                'Áreas Livres': qs_est_al['total']
+            },
+            'federal':
+            {
+                'Assentamentos': qs_fed_as['total'],
+                'UC Proteção Integral': qs_fed_pi['total'], 
+                'UC Uso Sustentável': qs_fed_us['total'],
+                'Áreas Livres': qs_fed_al['total']
+
+            }
+        }]
+        # else:
+        #     queryset = [[]]
+
+
+        # estagio = self.context['request'].GET.get('estagio', None)
+        # ano_inicio = self.context['request'].GET.get('ano_inicio', None)
+        # ano_fim = self.context['request'].GET.get('ano_fim', None)
+        # estado = self.context['request'].GET.get('estado', None)
+        # dominio = self.context['request'].GET.get('dominio', None)
+        # area = self.context['request'].GET.get('area', None)
+
+        # if tipo == 'Alerta DETER' or tipo == 'Alerta AWiFS':
+        #     mid_qs = filter_cruzamento_estadual_federal_padrao(
+        #         CruzamentoAlerta.objects.all(), self.context['request'].GET 
+        #     )
+
+        #     qs_est_as = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Estadual', 'dominio_as'
+        #     )
+        #     qs_est_pi = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Estadual', 'dominio_pi'
+        #     )
+        #     qs_est_us = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Estadual', 'dominio_us'
+        #     )
+        #     qs_est_ti = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Estadual', 'dominio_ti'
+        #     )
+        #     qs_est_al = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Estadual', 'areas_livre'
+        #     )
+
+
+        #     qs_fed_as = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Federal', 'dominio_as'
+        #     )
+        #     qs_fed_pi = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Federal', 'dominio_pi'
+        #     )
+        #     qs_fed_us = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Federal', 'dominio_us'
+        #     )
+        #     qs_fed_al = filter_cruzamento_estadual_federal_area(
+        #         mid_qs, 'Federal', 'areas_livre'
+        #     )
+
+        #     queryset = [{
+        #         'estadual': 
+        #         {
+        #             'Assentamentos': qs_est_as['total'],
+        #             'UC Proteção Integral': qs_est_pi['total'], 
+        #             'UC Uso Sustentável': qs_est_us['total'], 
+        #             'Terras Indígenas': qs_est_ti['total'], 
+        #             'Áreas Livres': qs_est_al['total']
+        #         },
+        #         'federal':
+        #         {
+        #             'Assentamentos': qs_fed_as['total'],
+        #             'UC Proteção Integral': qs_fed_pi['total'], 
+        #             'UC Uso Sustentável': qs_fed_us['total'],
+        #             'Áreas Livres': qs_fed_al['total']
+
+        #         }
+        #     }]
+        # else:
+        #     queryset = [[]]
+
+        return queryset[0]

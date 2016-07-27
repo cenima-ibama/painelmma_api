@@ -6,6 +6,7 @@ from django.conf.urls import patterns, url
 from .views import grafico1, grafico2, grafico3, grafico4, grafico5, grafico6, grafico7, grafico8, grafico9
 from .views import gauge1, gauge2
 from .views import mapa
+from .views import cruzamentoGrafico1, cruzamentoGrafico2
 
 
 urlpatterns = patterns('',
@@ -47,6 +48,14 @@ urlpatterns = patterns('',
     url(r'^mapa/$',
         mapa.as_view(),
         name="mapa"
+    ),
+    url(r'^cruz-grafico1/$',
+        cruzamentoGrafico1.as_view(),
+        name="cruz-grafico1"
+    ),
+    url(r'^cruz-grafico2/$',
+        cruzamentoGrafico2.as_view(),
+        name="cruz-grafico2"
     ),
 )
 
