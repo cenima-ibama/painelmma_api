@@ -508,7 +508,7 @@ class PublicDeterSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = PublicAlertaDeter
-        geo_field = 'shape'
+        geo_field = 'geom'
 
     # def get_data(self, obj):
     #     queryset = self.model.objects
@@ -522,7 +522,7 @@ class DailyDeterSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = DailyAlertaDeter
-        geo_field = 'shape'
+        geo_field = 'geom'
 
     # def get_data(self, obj):
     #     queryset = self.model.objects
@@ -536,7 +536,7 @@ class PublicDeterQualifSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = PublicAlertaDeterQualif
-        geo_field = 'shape'
+        geo_field = 'geom'
 
     # def get_data(self, obj):
     #     queryset = self.model.objects
@@ -550,7 +550,7 @@ class DailyDeterQualifSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = DailyAlertaDeterQualif
-        geo_field = 'shape'
+        geo_field = 'geom'
 
     # def get_data(self, obj):
     #     queryset = self.model.objects
@@ -564,7 +564,7 @@ class DailyAwifsSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = DailyAlertaAwifs
-        geo_field = 'shape'
+        geo_field = 'geom'
 
     # def get_data(self, obj):
     #     queryset = self.model.objects
