@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('restApp.urls', namespace='api')),
     url(r'^login/', include('loginApp.urls', namespace='api'), name='login'),
+    url(r'^painelmma_api/', include('painelmma_api.urls', namespace='api'), name='painelmma_api'),
     #url(r'^estatisticas/(?P<tipo>\w+)$',
         #grafico1.as_view(),
         #name='grafico1'),
