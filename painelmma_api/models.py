@@ -49,3 +49,6 @@ class AlertaHexgis(models.Model):
 
     def total(self):
         return self.area_ha
+
+    def interval(self):
+        return (self.img_data - self.img_n_data).days

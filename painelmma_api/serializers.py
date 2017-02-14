@@ -34,4 +34,4 @@ class AlertaMapaSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = AlertaHexgis
         geo_field = 'geom'
-        fields = ['img_data', 'area_ha', 'mes', 'ano', 'estagio']
+        fields = ['img_data', 'area_ha', 'estagio', 'id_des', 'interval', 'img_ex', 'img_n_ex']
